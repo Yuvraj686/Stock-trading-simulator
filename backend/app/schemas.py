@@ -76,4 +76,3 @@ class SellStockCreate(BaseModel):
     stock_symbol: str
     quantity: int
     price: float
-    type: str

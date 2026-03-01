@@ -31,12 +31,19 @@ async def buy_stock(
         raise HTTPException(status_code=404, detail="Stock not found")
 
     # Calculate total cost
-    total_cost = db_stock.current_price * stock.quantity
+    total_cost = db_stock.price * stock.quantity
 
     # Check wallet balance
     wallet = db.query(Wallet).filter(
         Wallet.user_id == current_user.id
     ).first()
+
+    if not wallet:
+        wallet = Wallet(user_id=current_user.id, balance=100000)
+        db.add(wallet)
+        db.commit()
+        db.refresh(wallet)
+    
 
     if wallet.balance < total_cost:
         raise HTTPException(status_code=400, detail="Insufficient balance")
@@ -50,7 +57,7 @@ async def buy_stock(
             user_id=current_user.id,
             stock_id=db_stock.id,
             quantity=stock.quantity,
-            price=db_stock.current_price,
+            price=db_stock.price,
             type="Buy"
         )
 
@@ -66,7 +73,7 @@ async def buy_stock(
             total_quantity = portfolio.quantity + stock.quantity
             new_avg_price = (
                 (portfolio.quantity * portfolio.avg_price) +
-                (stock.quantity * db_stock.current_price)
+                (stock.quantity * db_stock.price)
             ) / total_quantity
 
             portfolio.quantity = total_quantity
@@ -77,7 +84,7 @@ async def buy_stock(
                 user_id=current_user.id,
                 stock_id=db_stock.id,
                 quantity=stock.quantity,
-                avg_price=db_stock.current_price
+                avg_price=db_stock.price
             )
             db.add(portfolio)
 
@@ -119,14 +126,17 @@ async def sell_stock(
         raise HTTPException(status_code=400, detail="Not enough shares to sell")
 
     # Calculate total sell value
-    total_sell_value = db_stock.current_price * stock.quantity
+    total_sell_value = db_stock.price* stock.quantity
 
     # Calculate realized P&L
-    realized_profit = (db_stock.current_price - portfolio.avg_price) * stock.quantity
+    realized_profit = (db_stock.price - portfolio.avg_price) * stock.quantity
 
     wallet = db.query(Wallet).filter(
         Wallet.user_id == current_user.id
     ).first()
+
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
 
     try:
         # Add money to wallet
@@ -144,9 +154,9 @@ async def sell_stock(
             user_id=current_user.id,
             stock_id=db_stock.id,
             quantity=stock.quantity,
-            price=db_stock.current_price,
+            price=db_stock.price,
             type="Sell",
-            realized_pnl=realized_profit
+            # realized_pnl=realized_profit
         )
 
         db.add(order)
@@ -156,8 +166,7 @@ async def sell_stock(
 
         return {
             "message": "Stock sold successfully",
-            "sell_price": db_stock.current_price,
-            "realized_profit": realized_profit
+            "sell_price": db_stock.price
         }
 
     except SQLAlchemyError:
