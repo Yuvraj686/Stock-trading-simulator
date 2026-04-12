@@ -1,0 +1,217 @@
+﻿app\config.py:4:1: E302 expected 2 blank lines, found 1
+app\config.py:6:27: W291 trailing whitespace
+app\config.py:11:20: W291 trailing whitespace
+app\config.py:20:1: E305 expected 2 blank lines after class or function definition, found 1
+app\database.py:10:80: E501 line too long (184 > 79 characters)
+app\database.py:14:80: E501 line too long (96 > 79 characters)
+app\database.py:35:80: E501 line too long (184 > 79 characters)
+app\database.py:41:45: E231 missing whitespace after ','
+app\database.py:41:61: E231 missing whitespace after ','
+app\database.py:45:1: E302 expected 2 blank lines, found 1
+app\database.py:52:1: E305 expected 2 blank lines after class or function definition, found 1
+app\database.py:53:1: W391 blank line at end of file
+app\main.py:1:1: F401 'fastapi.Depends' imported but unused
+app\main.py:5:1: F401 '.database.get_db' imported but unused
+app\main.py:5:29: E203 whitespace before ','
+app\main.py:6:1: F401 '.schemas' imported but unused
+app\main.py:6:21: E203 whitespace before ','
+app\main.py:7:1: F401 'sqlalchemy.orm.Session' imported but unused
+app\main.py:8:1: F401 'sqlalchemy.func' imported but unused
+app\main.py:9:1: F401 'typing.List' imported but unused
+app\main.py:13:1: E402 module level import not at top of file
+app\main.py:37:22: E231 missing whitespace after ':'
+app\models.py:4:80: E501 line too long (90 > 79 characters)
+app\models.py:10:1: E302 expected 2 blank lines, found 1
+app\models.py:12:1: W293 blank line contains whitespace
+app\models.py:16:29: E203 whitespace before ','
+app\models.py:16:41: E251 unexpected spaces around keyword / parameter equals
+app\models.py:17:29: E203 whitespace before ','
+app\models.py:17:41: E251 unexpected spaces around keyword / parameter equals
+app\models.py:19:48: E251 unexpected spaces around keyword / parameter equals
+app\models.py:20:60: E251 unexpected spaces around keyword / parameter equals
+app\models.py:20:80: E501 line too long (96 > 79 characters)
+app\models.py:25:1: W293 blank line contains whitespace
+app\models.py:26:9: E222 multiple spaces after operator
+app\models.py:26:25: E203 whitespace before ','
+app\models.py:26:39: E251 unexpected spaces around keyword / parameter equals
+app\models.py:26:41: E251 unexpected spaces around keyword / parameter equals
+app\models.py:26:46: E203 whitespace before ','
+app\models.py:26:57: E251 unexpected spaces around keyword / parameter equals
+app\models.py:26:59: E251 unexpected spaces around keyword / parameter equals
+app\models.py:27:38: E251 unexpected spaces around keyword / parameter equals
+app\models.py:28:25: E203 whitespace before ','
+app\models.py:28:37: E251 unexpected spaces around keyword / parameter equals
+app\models.py:29:27: E203 whitespace before ','
+app\models.py:29:39: E251 unexpected spaces around keyword / parameter equals
+app\models.py:33:1: E302 expected 2 blank lines, found 1
+app\models.py:35:1: W293 blank line contains whitespace
+app\models.py:36:9: E222 multiple spaces after operator
+app\models.py:36:25: E203 whitespace before ','
+app\models.py:36:39: E251 unexpected spaces around keyword / parameter equals
+app\models.py:36:41: E251 unexpected spaces around keyword / parameter equals
+app\models.py:36:46: E203 whitespace before ','
+app\models.py:36:57: E251 unexpected spaces around keyword / parameter equals
+app\models.py:36:59: E251 unexpected spaces around keyword / parameter equals
+app\models.py:38:29: W291 trailing whitespace
+app\models.py:39:64: W291 trailing whitespace
+app\models.py:40:29: E251 unexpected spaces around keyword / parameter equals
+app\models.py:40:31: E251 unexpected spaces around keyword / parameter equals
+app\models.py:42:1: W293 blank line contains whitespace
+app\models.py:44:21: E128 continuation line under-indented for visual indent
+app\models.py:45:21: E128 continuation line under-indented for visual indent
+app\models.py:45:30: E251 unexpected spaces around keyword / parameter equals
+app\models.py:47:1: W293 blank line contains whitespace
+app\models.py:48:25: E203 whitespace before ','
+app\models.py:48:37: E251 unexpected spaces around keyword / parameter equals
+app\models.py:49:30: E203 whitespace before ','
+app\models.py:49:42: E251 unexpected spaces around keyword / parameter equals
+app\models.py:50:25: E203 whitespace before ','
+app\models.py:50:37: E251 unexpected spaces around keyword / parameter equals
+app\models.py:51:50: E231 missing whitespace after ','
+app\models.py:51:80: E501 line too long (95 > 79 characters)
+app\models.py:53:1: E302 expected 2 blank lines, found 1
+app\models.py:55:1: W293 blank line contains whitespace
+app\models.py:56:9: E222 multiple spaces after operator
+app\models.py:56:25: E203 whitespace before ','
+app\models.py:56:39: E251 unexpected spaces around keyword / parameter equals
+app\models.py:56:41: E251 unexpected spaces around keyword / parameter equals
+app\models.py:56:46: E203 whitespace before ','
+app\models.py:56:57: E251 unexpected spaces around keyword / parameter equals
+app\models.py:56:59: E251 unexpected spaces around keyword / parameter equals
+app\models.py:58:29: W291 trailing whitespace
+app\models.py:59:64: W291 trailing whitespace
+app\models.py:60:29: E251 unexpected spaces around keyword / parameter equals
+app\models.py:60:31: E251 unexpected spaces around keyword / parameter equals
+app\models.py:62:1: W293 blank line contains whitespace
+app\models.py:64:21: E128 continuation line under-indented for visual indent
+app\models.py:65:21: E128 continuation line under-indented for visual indent
+app\models.py:65:30: E251 unexpected spaces around keyword / parameter equals
+app\models.py:67:1: W293 blank line contains whitespace
+app\models.py:68:30: E203 whitespace before ','
+app\models.py:68:42: E251 unexpected spaces around keyword / parameter equals
+app\models.py:69:29: E203 whitespace before ','
+app\models.py:69:41: E251 unexpected spaces around keyword / parameter equals
+app\models.py:70:49: E231 missing whitespace after ','
+app\models.py:70:80: E501 line too long (94 > 79 characters)
+app\models.py:77:1: E302 expected 2 blank lines, found 1
+app\models.py:79:1: W293 blank line contains whitespace
+app\models.py:80:9: E222 multiple spaces after operator
+app\models.py:80:25: E203 whitespace before ','
+app\models.py:80:39: E251 unexpected spaces around keyword / parameter equals
+app\models.py:80:41: E251 unexpected spaces around keyword / parameter equals
+app\models.py:80:46: E203 whitespace before ','
+app\models.py:80:57: E251 unexpected spaces around keyword / parameter equals
+app\models.py:80:59: E251 unexpected spaces around keyword / parameter equals
+app\models.py:82:29: W291 trailing whitespace
+app\models.py:83:45: W291 trailing whitespace
+app\models.py:84:29: E251 unexpected spaces around keyword / parameter equals
+app\models.py:84:31: E251 unexpected spaces around keyword / parameter equals
+app\models.py:86:1: W293 blank line contains whitespace
+app\models.py:88:21: E128 continuation line under-indented for visual indent
+app\models.py:89:21: E128 continuation line under-indented for visual indent
+app\models.py:89:30: E251 unexpected spaces around keyword / parameter equals
+app\models.py:91:1: W293 blank line contains whitespace
+app\models.py:92:28: E203 whitespace before ','
+app\models.py:92:40: E251 unexpected spaces around keyword / parameter equals
+app\models.py:93:23: E203 whitespace before ','
+app\models.py:93:35: E251 unexpected spaces around keyword / parameter equals
+app\models.py:94:54: E251 unexpected spaces around keyword / parameter equals
+app\models.py:95:50: E231 missing whitespace after ','
+app\models.py:95:80: E501 line too long (95 > 79 characters)
+app\models.py:102:80: E501 line too long (86 > 79 characters)
+app\models.py:103:80: E501 line too long (82 > 79 characters)
+app\models.py:106:58: W292 no newline at end of file
+app\oauth2.py:2:30: E231 missing whitespace after ','
+app\oauth2.py:2:40: E231 missing whitespace after ','
+app\oauth2.py:4:28: E231 missing whitespace after ','
+app\oauth2.py:4:35: E231 missing whitespace after ','
+app\oauth2.py:7:1: F811 redefinition of unused 'models' from line 3
+app\oauth2.py:14:67: W291 trailing whitespace
+app\oauth2.py:16:1: E302 expected 2 blank lines, found 1
+app\oauth2.py:18:1: W293 blank line contains whitespace
+app\oauth2.py:20:80: E501 line too long (83 > 79 characters)
+app\oauth2.py:21:1: W293 blank line contains whitespace
+app\oauth2.py:22:39: E231 missing whitespace after ','
+app\oauth2.py:22:50: E231 missing whitespace after ','
+app\oauth2.py:25:1: E302 expected 2 blank lines, found 1
+app\oauth2.py:27:35: E231 missing whitespace after ','
+app\oauth2.py:27:46: E231 missing whitespace after ','
+app\oauth2.py:42:1: E302 expected 2 blank lines, found 1
+app\oauth2.py:63:1: W391 blank line at end of file
+app\routers\auth.py:1:1: F401 'fastapi.Response' imported but unused
+app\routers\auth.py:9:1: E303 too many blank lines (3)
+app\routers\auth.py:14:1: E302 expected 2 blank lines, found 1
+app\routers\auth.py:14:22: E231 missing whitespace after ','
+app\routers\auth.py:15:66: E231 missing whitespace after ','
+app\routers\auth.py:15:80: E501 line too long (97 > 79 characters)
+app\routers\auth.py:16:80: E501 line too long (97 > 79 characters)
+app\routers\auth.py:18:66: E231 missing whitespace after ','
+app\routers\auth.py:18:80: E501 line too long (95 > 79 characters)
+app\routers\auth.py:19:50: E231 missing whitespace after ','
+app\routers\auth.py:20:66: E231 missing whitespace after ','
+app\routers\auth.py:20:80: E501 line too long (95 > 79 characters)
+app\routers\auth.py:21:51: E251 unexpected spaces around keyword / parameter equals
+app\routers\auth.py:21:53: E251 unexpected spaces around keyword / parameter equals
+app\routers\auth.py:22:1: W293 blank line contains whitespace
+app\routers\auth.py:23:80: E501 line too long (85 > 79 characters)
+app\routers\auth.py:23:86: W292 no newline at end of file
+app\routers\orders.py:1:1: F401 'fastapi.FastAPI' imported but unused
+app\routers\orders.py:1:1: F401 'fastapi.Response' imported but unused
+app\routers\orders.py:1:1: F401 'fastapi.status' imported but unused
+app\routers\orders.py:1:80: E501 line too long (80 > 79 characters)
+app\routers\orders.py:5:1: F401 'typing.List' imported but unused
+app\routers\orders.py:6:1: F401 'backend.app.models.Transactions' imported but unused
+app\routers\orders.py:6:1: F401 'backend.app.models.Users' imported but unused
+app\routers\orders.py:6:63: E203 whitespace before ','
+app\routers\orders.py:6:80: E501 line too long (86 > 79 characters)
+app\routers\orders.py:9:1: F811 redefinition of unused 'HTTPException' from line 1
+app\routers\orders.py:19:1: E303 too many blank lines (3)
+app\routers\orders.py:46:1: W293 blank line contains whitespace
+app\routers\orders.py:48:5: E303 too many blank lines (2)
+app\routers\orders.py:123:80: E501 line too long (80 > 79 characters)
+app\routers\orders.py:126:80: E501 line too long (80 > 79 characters)
+app\routers\orders.py:129:38: E225 missing whitespace around operator
+app\routers\orders.py:132:5: F841 local variable 'realized_profit' is assigned to but never used
+app\routers\orders.py:176:1: E302 expected 2 blank lines, found 1
+app\routers\orders.py:181:80: E501 line too long (97 > 79 characters)
+app\routers\orders.py:184:1: W293 blank line contains whitespace
+app\routers\orders.py:197:1: E302 expected 2 blank lines, found 1
+app\routers\orders.py:202:80: E501 line too long (88 > 79 characters)
+app\routers\orders.py:205:1: W293 blank line contains whitespace
+app\routers\orders.py:218:18: W292 no newline at end of file
+app\routers\stocks.py:1:1: F401 'fastapi.FastAPI' imported but unused
+app\routers\stocks.py:1:1: F401 'fastapi.Response' imported but unused
+app\routers\stocks.py:1:1: F401 'fastapi.status' imported but unused
+app\routers\stocks.py:1:1: F401 'fastapi.HTTPException' imported but unused
+app\routers\stocks.py:1:80: E501 line too long (80 > 79 characters)
+app\routers\stocks.py:13:22: E231 missing whitespace after ','
+app\routers\users.py:1:1: F401 'fastapi.FastAPI' imported but unused
+app\routers\users.py:1:1: F401 'fastapi.Response' imported but unused
+app\routers\users.py:1:80: E501 line too long (80 > 79 characters)
+app\routers\users.py:11:1: E302 expected 2 blank lines, found 1
+app\routers\users.py:11:80: E501 line too long (90 > 79 characters)
+app\routers\users.py:26:1: W293 blank line contains whitespace
+app\routers\users.py:43:1: W391 blank line at end of file
+app\routers\wallet.py:7:1: F811 redefinition of unused 'APIRouter' from line 1
+app\routers\wallet.py:7:1: F811 redefinition of unused 'Depends' from line 3
+app\routers\wallet.py:7:1: F811 redefinition of unused 'HTTPException' from line 3
+app\routers\wallet.py:7:1: F401 'fastapi.HTTPException' imported but unused
+app\routers\wallet.py:8:1: F811 redefinition of unused 'models' from line 4
+app\routers\wallet.py:9:1: F401 'fastapi.security.oauth2.OAuth2PasswordRequestForm' imported but unused
+app\routers\wallet.py:10:1: F811 redefinition of unused 'Session' from line 2
+app\routers\wallet.py:19:1: E302 expected 2 blank lines, found 1
+app\routers\wallet.py:35:18: W292 no newline at end of file
+app\schemas.py:11:1: E302 expected 2 blank lines, found 1
+app\schemas.py:16:5: E301 expected 1 blank line, found 0
+app\schemas.py:19:1: E302 expected 2 blank lines, found 1
+app\schemas.py:28:1: E302 expected 2 blank lines, found 1
+app\schemas.py:37:1: E302 expected 2 blank lines, found 1
+app\schemas.py:43:1: E302 expected 2 blank lines, found 1
+app\schemas.py:48:1: E302 expected 2 blank lines, found 1
+app\schemas.py:52:1: E302 expected 2 blank lines, found 1
+app\schemas.py:63:1: E302 expected 2 blank lines, found 1
+app\schemas.py:67:1: E302 expected 2 blank lines, found 1
+app\schemas.py:70:1: E302 expected 2 blank lines, found 1
+app\schemas.py:75:1: E302 expected 2 blank lines, found 1
+app\utils.py:8:1: E302 expected 2 blank lines, found 1
+app\utils.py:11:1: E302 expected 2 blank lines, found 1

@@ -10,8 +10,9 @@ import enum
 class Users(Base):
     __tablename__ = "users"
     
-    id =  Column(Integer , primary_key = True , nullable = False)
-    email = Column(String, nullable= False)
+    id = Column(Integer, primary_key=True, nullable=False)
+    # username = Column(String, unique=True, nullable=True)
+    email = Column(String, nullable=False, unique=True)
     password = Column(String , nullable= False)
     balance = Column(Integer , nullable= False)
     wallet = relationship("Wallet", back_populates="user", uselist=False)
@@ -26,7 +27,8 @@ class Stocks(Base):
     symbol = Column(String, nullable= False)
     name = Column(String , nullable= False)
     price = Column(Integer , nullable= False)
-    is_active = Column(Boolean, server_default= 'True')
+    sector = Column(String, nullable=False)
+    # is_active = Column(Boolean, server_default= 'True')
 
 class Orders(Base):
     __tablename__ = "orders"
@@ -34,7 +36,7 @@ class Orders(Base):
     id =  Column(Integer , primary_key = True , nullable = False)
     user_id = Column(
                     Integer, 
-                    ForeignKey("users.id"), 
+                    ForeignKey("users.id", ondelete="CASCADE"), 
                     nullable = False)
     user = relationship("Users")
     
@@ -54,7 +56,7 @@ class Portfolio(Base):
     id =  Column(Integer , primary_key = True , nullable = False)
     user_id = Column(
                     Integer, 
-                    ForeignKey("users.id"), 
+                    ForeignKey("users.id", ondelete="CASCADE"), 
                     nullable = False)
     user = relationship("Users")
     

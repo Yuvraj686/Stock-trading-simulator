@@ -3,6 +3,7 @@ from datetime import datetime
 
 
 class UserCreate(BaseModel):
+    username: str
     email: str
     password: str
     balance: int
@@ -19,7 +20,10 @@ class stockOut(BaseModel):
     symbol: str
     name: str
     price: int
-    is_active: bool
+    sector: str
+
+    class Config:
+        from_attributes = True
 
 class orders(BaseModel):
     id: int
@@ -42,10 +46,8 @@ class transaction(BaseModel):
     pnl: int
 
 class BuyStockCreate(BaseModel):
-    user_id: int
     stock_symbol: str
     quantity: int
-    price: float
 
 class BuyStockResponse(BaseModel):
     id: int
@@ -65,14 +67,11 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     id: int
 
-
 class TokenWithUser(BaseModel):
     access_token: str
     token_type: str
     user_id: int
 
 class SellStockCreate(BaseModel):
-    user_id: int
     stock_symbol: str
     quantity: int
-    price: float

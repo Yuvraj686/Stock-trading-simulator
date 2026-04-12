@@ -39,7 +39,7 @@ async def buy_stock(
     ).first()
 
     if not wallet:
-        wallet = Wallet(user_id=current_user.id, balance=100000)
+        wallet = Wallet(user_id=current_user.id, balance=10000)
         db.add(wallet)
         db.commit()
         db.refresh(wallet)
@@ -172,3 +172,47 @@ async def sell_stock(
     except SQLAlchemyError:
         db.rollback()
         raise HTTPException(status_code=500, detail="Transaction failed")
+
+@router.get("/portfolio")
+def get_portfolio(
+    db: Session = Depends(get_db),
+    current_user: models.Users = Depends(get_current_user)
+):
+    portfolio = db.query(Portfolio, Stocks).join(Stocks, Portfolio.stock_id == Stocks.id).filter(
+        Portfolio.user_id == current_user.id
+    ).all()
+    
+    result = []
+    for port, stock in portfolio:
+        result.append({
+            "stock_id": port.stock_id,
+            "symbol": stock.symbol,
+            "name": stock.name,
+            "quantity": port.quantity,
+            "avg_price": port.avg_price,
+            "current_price": stock.price
+        })
+    return result
+
+@router.get("/transactions")
+def get_transactions(
+    db: Session = Depends(get_db),
+    current_user: models.Users = Depends(get_current_user)
+):
+    orders = db.query(Orders, Stocks).join(Stocks, Orders.stock_id == Stocks.id).filter(
+        Orders.user_id == current_user.id
+    ).order_by(Orders.executed_at.desc()).all()
+    
+    result = []
+    for order, stock in orders:
+        result.append({
+            "id": order.id,
+            "symbol": stock.symbol,
+            "type": order.type.lower(),
+            "quantity": order.quantity,
+            "price": order.price,
+            "date": order.executed_at.isoformat() if order.executed_at else None,
+            "amount": order.quantity * order.price,
+            "status": "completed"
+        })
+    return result

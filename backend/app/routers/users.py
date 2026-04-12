@@ -23,28 +23,21 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     user_data = user.dict()
     user_data["password"] = utils.hash(user.password)
+    
+    # The database model does not have a username column at the moment
+    if "username" in user_data:
+        del user_data["username"]
 
     new_user = models.Users(**user_data)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
+    # Initialize wallet with $10,000
+    new_wallet = models.Wallet(user_id=new_user.id, balance=10000)
+    db.add(new_wallet)
+    db.commit()
+
     return new_user
 
 
-# @router.post("/login", response_model=schemas.Token)
-# def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
-
-#     user = db.query(models.Users).filter(
-#         models.Users.email == user_credentials.email
-#     ).first()
-
-#     if not user:
-#         raise HTTPException(status_code=403, detail="Invalid credentials")
-
-#     if not utils.verify(user_credentials.password, user.password):
-#         raise HTTPException(status_code=403, detail="Invalid credentials")
-
-#     access_token = create_access_token(data={"user_id": user.id})
-
-#     return {"access_token": access_token, "token_type": "bearer"}

@@ -27,6 +27,9 @@ def get_wallet(
     ).first()
 
     if not wallet:
-        raise HTTPException(status_code=404, detail="Wallet not found")
+        wallet = Wallet(user_id=current_user.id, balance=10000)
+        db.add(wallet)
+        db.commit()
+        db.refresh(wallet)
 
     return wallet
