@@ -1,46 +1,232 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-headline: "Manrope", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+/* Tradr — Clean Mint Design System
+   Light is default. `.dark` enables dark mode. All colors HSL. */
 
-  --color-primary: #000000;
-  --color-secondary: #006C49;
-  --color-secondary-vibrant: #10B981;
-  --color-error: #EF4444;
-  --color-background: #f8f9ff;
-  --color-surface: #f8f9ff;
-  --color-surface-container-low: #eff4ff;
-  --color-surface-container-high: #dce9ff;
-  --color-surface-container-highest: #d3e4fe;
-  --color-surface-container-lowest: #ffffff;
-  --color-on-surface: #0b1c30;
-  --color-on-surface-variant: #45464d;
-  --color-outline-variant: rgba(198, 198, 205, 0.15);
+@layer base {
+  :root {
+    /* === LIGHT (Clean Mint) === */
+    /* Surfaces */
+    --background: 150 30% 97%;
+    --foreground: 155 25% 12%;
 
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
+    --card: 0 0% 100%;
+    --card-foreground: 155 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 155 25% 12%;
+
+    --surface: 150 25% 96%;
+    --surface-elevated: 0 0% 100%;
+
+    /* Brand — fresh mint green */
+    --primary: 152 60% 38%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 152 70% 55%;
+
+    --secondary: 150 25% 94%;
+    --secondary-foreground: 155 25% 12%;
+
+    --muted: 150 20% 93%;
+    --muted-foreground: 155 12% 42%;
+
+    --accent: 152 55% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Market signals */
+    --bull: 152 60% 38%;
+    --bull-foreground: 0 0% 100%;
+    --bull-soft: 150 60% 90%;
+
+    --bear: 0 72% 55%;
+    --bear-foreground: 0 0% 100%;
+    --bear-soft: 0 75% 94%;
+
+    --warning: 38 92% 50%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 18% 88%;
+    --input: 150 18% 90%;
+    --ring: 152 60% 38%;
+
+    --radius: 0.875rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(152 60% 38%) 0%, hsl(165 70% 45%) 100%);
+    --gradient-bull: linear-gradient(180deg, hsl(152 60% 38% / 0.18) 0%, hsl(152 60% 38% / 0) 100%);
+    --gradient-bear: linear-gradient(180deg, hsl(0 72% 55% / 0.18) 0%, hsl(0 72% 55% / 0) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(150 25% 98%) 100%);
+    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(152 60% 60% / 0.10), transparent 60%);
+
+    /* Shadows */
+    --shadow-card: 0 1px 0 0 hsl(150 30% 100% / 0.6) inset, 0 8px 24px -12px hsl(155 30% 30% / 0.12);
+    --shadow-glow: 0 0 32px hsl(152 60% 50% / 0.25);
+    --shadow-elevated: 0 24px 48px -24px hsl(155 30% 30% / 0.20);
+
+    --transition-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* Sidebar */
+    --sidebar-background: 150 30% 96%;
+    --sidebar-foreground: 155 18% 35%;
+    --sidebar-primary: 152 60% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 25% 92%;
+    --sidebar-accent-foreground: 155 25% 12%;
+    --sidebar-border: 150 18% 86%;
+    --sidebar-ring: 152 60% 38%;
+  }
+
+  .dark {
+    /* === DARK (Mint Noir) === */
+    --background: 160 18% 6%;
+    --foreground: 150 20% 95%;
+
+    --card: 160 16% 9%;
+    --card-foreground: 150 20% 95%;
+
+    --popover: 160 16% 9%;
+    --popover-foreground: 150 20% 95%;
+
+    --surface: 160 14% 11%;
+    --surface-elevated: 160 12% 14%;
+
+    --primary: 152 65% 50%;
+    --primary-foreground: 160 18% 6%;
+    --primary-glow: 152 90% 60%;
+
+    --secondary: 160 12% 14%;
+    --secondary-foreground: 150 20% 95%;
+
+    --muted: 160 10% 16%;
+    --muted-foreground: 150 8% 62%;
+
+    --accent: 165 75% 50%;
+    --accent-foreground: 160 18% 6%;
+
+    --bull: 152 65% 50%;
+    --bull-foreground: 160 18% 6%;
+    --bull-soft: 152 50% 18%;
+
+    --bear: 0 75% 60%;
+    --bear-foreground: 0 0% 100%;
+    --bear-soft: 0 55% 22%;
+
+    --warning: 38 95% 60%;
+
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 160 12% 18%;
+    --input: 160 12% 16%;
+    --ring: 152 65% 50%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(152 65% 50%) 0%, hsl(165 80% 50%) 100%);
+    --gradient-bull: linear-gradient(180deg, hsl(152 65% 50% / 0.30) 0%, hsl(152 65% 50% / 0) 100%);
+    --gradient-bear: linear-gradient(180deg, hsl(0 75% 60% / 0.30) 0%, hsl(0 75% 60% / 0) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(160 14% 11%) 0%, hsl(160 16% 8%) 100%);
+    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(152 65% 50% / 0.15), transparent 60%);
+
+    --shadow-card: 0 1px 0 0 hsl(150 20% 95% / 0.04) inset, 0 20px 40px -20px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 40px hsl(152 65% 50% / 0.35);
+    --shadow-elevated: 0 30px 60px -30px hsl(0 0% 0% / 0.7);
+
+    --sidebar-background: 160 22% 5%;
+    --sidebar-foreground: 150 10% 70%;
+    --sidebar-primary: 152 65% 50%;
+    --sidebar-primary-foreground: 160 18% 6%;
+    --sidebar-accent: 160 14% 12%;
+    --sidebar-accent-foreground: 150 20% 95%;
+    --sidebar-border: 160 12% 14%;
+    --sidebar-ring: 152 65% 50%;
+  }
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-background text-on-surface font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01", "ss03";
+    background-image: var(--gradient-glow);
+    background-attachment: fixed;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/80 backdrop-blur-[24px] border border-outline-variant;
+    background: var(--gradient-surface);
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius);
   }
 
-  .editorial-shadow {
-    box-shadow: 0 32px 64px -12px rgba(11, 28, 48, 0.06);
-  }
-
-  .chart-gradient-gain {
-    background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0) 100%);
+  .ticker-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums;
   }
 }
+
+@layer utilities {
+  .text-bull { color: hsl(var(--bull)); }
+  .text-bear { color: hsl(var(--bear)); }
+  .bg-bull { background-color: hsl(var(--bull)); }
+  .bg-bear { background-color: hsl(var(--bear)); }
+  .bg-bull-soft { background-color: hsl(var(--bull-soft)); }
+  .bg-bear-soft { background-color: hsl(var(--bear-soft)); }
+  .bg-surface { background-color: hsl(var(--surface)); }
+  .bg-surface-elevated { background-color: hsl(var(--surface-elevated)); }
+
+  .gradient-primary { background: var(--gradient-primary); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-elevated { box-shadow: var(--shadow-elevated); }
+
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+.animate-pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-ticker { animation: ticker-scroll 40s linear infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.4s var(--transition-smooth) both; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in { animation: fade-in 0.2s ease-out both; }
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scale-in 0.25s var(--transition-smooth) both; }
+

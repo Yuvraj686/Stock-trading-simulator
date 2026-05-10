@@ -4,50 +4,104 @@ A responsive, full-stack web application that allows users to experience the thr
 
 ## ✨ Features
 
-- **Secure Authentication:** User sign-up and log-in seamlessly powered by JWT-based secure authorization with hashed passwords.
+- **Secure Authentication:** User sign-up and log-in seamlessly powered by Supabase Auth.
 - **Virtual Wallet:** Users receive virtual currency upon signing up and can perform secure stock purchases without real-world risk.
 - **Dashboard & Portfolio:** Track active investments, calculate net worth fluctuations, and analyze stock holdings in a clean intuitive interface.
 - **Market Capabilities:** Simulated buying and selling of stocks based on real-world stock prices.
 - **Transaction History:** Keep a comprehensive log of all purchases, sales, and wallet actions over time.
+- **Realtime Group Chat:** Live chat system for all logged-in users using Supabase Realtime.
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 - **Framework:** React + Vite
 - **Language:** TypeScript
-- **State Management / Data Fetching:** Axios / Custom Hooks (React)
-- **Styling:** CSS 
+- **Styling:** CSS
+- **Database Client:** Supabase JS
 
 ### Backend
 - **Framework:** FastAPI (Python)
-- **Database:** PostgreSQL (hosted on Supabase)
-- **ORM:** SQLAlchemy
-- **Data Validation:** Pydantic
-- **Authentication:** OAuth2 with Passlib & python-jose
+- **Database:** Supabase PostgreSQL
+- **Authentication:** Supabase Auth
+- **Realtime:** Supabase Realtime
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-Make sure you have Node.js and Python installed on your local machine.
+- Node.js
+- Python 3.8+
+- Supabase account
 
-### Backend Setup
-1. Navigate to the root directory and create a virtual environment:
+### Setup Instructions
+
+1. **Create Supabase Project**
+   - Go to [supabase.com](https://supabase.com) and create a new project
+   - Note down your project URL and API keys
+
+2. **Run SQL Migration**
+   - In your Supabase dashboard, go to SQL Editor
+   - Run the `create_tables.sql` script to create all tables, policies, and functions
+
+3. **Enable Realtime**
+   - In Supabase dashboard, go to Database > Replication
+   - Enable Realtime for the `messages` table
+
+4. **Set Environment Variables**
+   - Copy `.env.example` to `.env`
+   - Fill in your Supabase credentials:
+     ```
+     SUPABASE_URL=https://your-project.supabase.co
+     SUPABASE_ANON_KEY=your-anon-key
+     SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+     VITE_SUPABASE_URL=https://your-project.supabase.co
+     VITE_SUPABASE_ANON_KEY=your-anon-key
+     VITE_API_BASE_URL=http://localhost:8000
+     ```
+
+5. **Backend Setup**
    ```bash
+   cd backend
    python -m venv venv
-   source venv/Scripts/activate # On Windows use: .\venv\Scripts\activate
+   # On Windows: venv\Scripts\activate
+   # On macOS/Linux: source venv/bin/activate
+   pip install -r ../requirements.txt
+   uvicorn app.main:app --reload
    ```
-2. Install the backend dependencies:
+
+6. **Frontend Setup**
    ```bash
-   pip install -r requirements.txt
+   cd frontend
+   npm install
+   npm run dev
    ```
-3. Create a `.env` file in the root codebase with your Supabase Postgres Database credentials:
-   ```env
-   database_hostname=...
-   database_port=...
-   database_password=...
-   database_name=postgres
-   database_username=postgres
-   secret_key=YOUR_SECRET_JWT_KEY
+
+7. **Access the App**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:8000
+
+## 📁 Project Structure
+
+```
+├── backend/
+│   ├── app/
+│   │   ├── main.py          # FastAPI app
+│   │   ├── database.py      # Supabase client
+│   │   ├── config.py        # Settings
+│   │   ├── oauth2.py        # Auth middleware
+│   │   ├── schemas.py       # Pydantic models
+│   │   └── routers/         # API routes
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/      # React components
+│   │   ├── pages/          # Page components
+│   │   ├── lib/            # Utilities and API client
+│   │   └── constants.ts    # App constants
+│   ├── package.json
+│   └── vite.config.ts
+├── create_tables.sql        # Supabase schema
+└── .env.example            # Environment template
+```
    algorithm=HS256
    access_token_expire_minutes=30
    ```

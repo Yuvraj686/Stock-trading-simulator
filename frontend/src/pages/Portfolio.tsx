@@ -1,100 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, ArrowDownRight, MoreHorizontal, PieChart } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { Layout } from "@/components/Layout";
+import { StatGrid } from "@/components/StatGrid";
+import { PortfolioPnLChart } from "@/components/PortfolioPnLChart";
+import { HoldingsTable } from "@/components/HoldingsTable";
+import { usePortfolio } from "@/context/PortfolioContext";
+import { fmtUSD } from "@/lib/marketData";
+import { ChangeBadge } from "@/components/ChangeBadge";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
-export function Portfolio() {
-  const [portfolio, setPortfolio] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+// Distinct, vibrant colors for pie chart — each stock is easily distinguishable
+const COLORS = [
+  "#6366f1", // indigo
+  "#22c55e", // emerald
+  "#f59e0b", // amber
+  "#ef4444", // red
+  "#06b6d4", // cyan
+  "#ec4899", // pink
+  "#8b5cf6", // violet
+  "#14b8a6", // teal
+  "#f97316", // orange
+  "#3b82f6", // blue
+];
 
-  useEffect(() => {
-    const fetchPortfolio = async () => {
-      const token = localStorage.getItem('access_token');
-      try {
-        const response = await fetch('http://localhost:8000/portfolio', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setPortfolio(data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch portfolio', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchPortfolio();
-  }, []);
+export default function Portfolio() {
+  const { holdings, totals, setSelectedSymbol, selectedSymbol } = usePortfolio();
 
-  // Calculate some basic stats if we have data
-  const totalValue = portfolio.reduce((acc, item) => acc + (item.quantity * item.current_price), 0);
+  const allocation = holdings.map((h) => ({
+    name: h.symbol,
+    value: +(h.qty * h.price).toFixed(2),
+  }));
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
-      <section className="flex flex-col md:flex-row justify-between items-end gap-6">
-        <div>
-          <span className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Asset Allocation</span>
-          <h1 className="text-5xl font-extrabold font-headline tracking-tighter text-on-surface mt-1">My Portfolio</h1>
-        </div>
-        <div className="flex bg-slate-100 rounded-xl p-1">
-          <button className="bg-white text-black px-4 py-2 rounded-lg text-xs font-bold shadow-sm">All Assets</button>
-        </div>
-      </section>
+    <Layout>
+      <StatGrid totals={totals} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-2xl p-8 editorial-shadow">
-          <h3 className="text-xl font-bold font-headline mb-6">Holdings</h3>
-          <div className="space-y-4">
-            {loading ? (
-              <div className="text-center py-8 text-on-surface-variant font-medium">Loading portfolio...</div>
-            ) : portfolio.length === 0 ? (
-              <div className="text-center py-8 text-on-surface-variant font-medium">You don't own any assets yet.</div>
-            ) : (
-              portfolio.map((item) => {
-                const totalAssetValue = item.quantity * item.current_price;
-                const totalAssetCost = item.quantity * item.avg_price;
-                const totalGain = totalAssetValue - totalAssetCost;
-                const totalGainPercent = totalAssetCost > 0 ? (totalGain / totalAssetCost) * 100 : 0;
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+        <PortfolioPnLChart pnl={totals.pnl} pnlPct={totals.pnlPct} />
 
-                return (
-                  <div key={item.symbol} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                        <span className="font-black text-xs">{item.symbol}</span>
-                      </div>
-                      <div>
-                        <div className="font-bold text-sm">{item.name}</div>
-                        <div className="text-xs text-on-surface-variant font-medium">{item.quantity} Shares @ ${item.avg_price?.toFixed(2) || '0.00'}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-sm">${totalAssetValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                      <div className={cn(
-                        "text-xs font-bold flex items-center justify-end",
-                        totalGain >= 0 ? "text-secondary-vibrant" : "text-error"
-                      )}>
-                        {totalGain >= 0 ? '+' : ''}{totalGainPercent.toFixed(2)}%
-                      </div>
-                    </div>
+        <div className="glass-card p-5 animate-fade-up">
+          <h3 className="font-display text-base font-bold text-foreground">Allocation</h3>
+          <p className="text-xs text-muted-foreground">By market value</p>
+          <div className="mt-3 h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={allocation} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={2}>
+                  {allocation.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="hsl(var(--background))" strokeWidth={2} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                  formatter={(v: number) => [fmtUSD(v), "Value"]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <ul className="mt-2 space-y-1.5">
+            {allocation.map((a, i) => {
+              const pct = ((a.value / totals.equity) * 100).toFixed(1);
+              return (
+                <li key={a.name} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
+                    <span className="font-mono font-semibold text-foreground">{a.name}</span>
                   </div>
-                );
-              })
-            )}
-          </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono tabular-nums text-muted-foreground">{fmtUSD(a.value)}</span>
+                    <span className="font-mono tabular-nums text-foreground w-10 text-right">{pct}%</span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </div>
+      </div>
 
-        <div className="bg-black text-white rounded-2xl p-8 editorial-shadow flex flex-col justify-between">
-          <div>
-            <PieChart size={32} className="mb-4 text-secondary-vibrant" />
-            <h3 className="text-2xl font-bold font-headline tracking-tight">Portfolio Value</h3>
-            <p className="text-slate-400 text-sm mt-2">Total value of all your current holdings in the market.</p>
-          </div>
-          <div className="mt-8">
-            <div className="text-4xl font-bold tracking-tight">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-          </div>
-        </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <SummaryCell label="Total Equity" value={fmtUSD(totals.equity + totals.cash)} sub="cash + holdings" />
+        <SummaryCell label="Realized + Unrealized P&L" value={`${totals.pnl >= 0 ? "+" : ""}${fmtUSD(totals.pnl)}`} pct={totals.pnlPct} />
+        <SummaryCell label="Today's P&L" value={`${totals.dayPnl >= 0 ? "+" : ""}${fmtUSD(totals.dayPnl)}`} pct={totals.dayPnlPct} />
+      </div>
+
+      <HoldingsTable holdings={holdings} onSelect={setSelectedSymbol} selected={selectedSymbol} />
+    </Layout>
+  );
+}
+
+function SummaryCell({ label, value, sub, pct }: { label: string; value: string; sub?: string; pct?: number }) {
+  return (
+    <div className="glass-card p-5 animate-fade-up">
+      <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-2 font-display text-2xl font-bold tabular-nums text-foreground">{value}</div>
+      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+        {pct !== undefined && <ChangeBadge value={pct} />}
+        {sub && <span>{sub}</span>}
       </div>
     </div>
   );

@@ -1,70 +1,57 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { Sidebar } from './components/Sidebar';
-import { TopNav } from './components/TopNav';
-import { Dashboard } from './pages/Dashboard';
-import { Portfolio } from './pages/Portfolio';
-import { Wallet } from './pages/Wallet';
-import { Profile } from './pages/Profile';
-import { Login } from './pages/Login';
-import { Signup } from './pages/Signup';
-import { StockDetails } from './pages/StockDetails';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import Index from "./pages/Index.tsx";
+import NotFound from "./pages/NotFound.tsx";
+import Markets from "./pages/Markets.tsx";
+import Portfolio from "./pages/Portfolio.tsx";
+import Holdings from "./pages/Holdings.tsx";
+import Transactions from "./pages/Transactions.tsx";
+import WatchlistPage from "./pages/Watchlist.tsx";
+import { Login } from "./pages/Login.tsx";
+import { Signup } from "./pages/Signup.tsx";
+import { PortfolioProvider } from "./context/PortfolioContext.tsx";
+import { ThemeProvider } from "./context/ThemeContext.tsx";
 
-function Layout({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+const queryClient = new QueryClient();
 
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
-
-  return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <TopNav />
-        <main className="p-6 lg:p-10 max-w-7xl mx-auto w-full">
-          {children}
-        </main>
-      </div>
-      
-      {/* Mobile Nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 px-6 py-4 flex justify-between items-center z-50">
-        <SidebarMobile />
-      </nav>
-    </div>
-  );
+/** Redirect to /login if no auth token is present */
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const token = localStorage.getItem("token");
+  return token ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
-function SidebarMobile() {
-  // Simplified mobile nav for brevity
-  return (
-    <div className="flex justify-around w-full">
-      <button className="flex flex-col items-center gap-1 text-black">
-        <div className="w-1 h-1 bg-black rounded-full mb-1"></div>
-        <span className="text-[0.65rem] font-bold uppercase">Home</span>
-      </button>
-      {/* Add more mobile items as needed */}
-    </div>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <PortfolioProvider>
+            <Routes>
+              {/* Auth pages — no guard */}
+              <Route path="/login"  element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
 
-export default function App() {
-  return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/wallet" element={<Wallet />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/stock/:symbol" element={<StockDetails />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Layout>
-    </Router>
-  );
-}
+              {/* Protected pages */}
+              <Route path="/"            element={<PrivateRoute><Markets /></PrivateRoute>} />
+              <Route path="/dashboard"   element={<PrivateRoute><Index /></PrivateRoute>} />
+              <Route path="/markets"     element={<PrivateRoute><Markets /></PrivateRoute>} />
+              <Route path="/portfolio"   element={<PrivateRoute><Portfolio /></PrivateRoute>} />
+              <Route path="/holdings"    element={<PrivateRoute><Holdings /></PrivateRoute>} />
+              <Route path="/transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />
+              <Route path="/watchlist"   element={<PrivateRoute><WatchlistPage /></PrivateRoute>} />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </PortfolioProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
+
+export default App;

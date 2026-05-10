@@ -4,11 +4,29 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
-!.env.example
 
-# Python overrides
+# ── Environment files — NEVER commit real credentials ─────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example
+# No backend/.env — the single root .env is the source of truth
+
+# ── Python ────────────────────────────────────────────────────────────────────
 venv/
+.venv/
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.pyc

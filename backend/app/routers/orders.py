@@ -1,218 +1,186 @@
-from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
-from .. import models, schemas
-from sqlalchemy.orm import Session
-from ..database import get_db
+"""orders.py — Buy/Sell execution, portfolio, and transaction history."""
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from supabase import Client
+from decimal import Decimal
 from typing import List
-from backend.app.models import Transactions, Portfolio, Orders , Stocks, Users, Wallet
-from ..oauth2 import get_current_user
-from sqlalchemy.exc import SQLAlchemyError
-from fastapi import HTTPException
+
+from ..database import get_supabase
+from .. import schemas, oauth2
+
+router = APIRouter(tags=["Orders"])
 
 
-router = APIRouter(
-    # prefix="/orders",
-    tags=['Orders']
-)
-
-
-
-@router.post("/buy")
-async def buy_stock(
-    stock: schemas.BuyStockCreate,
-    db: Session = Depends(get_db),
-    current_user: models.Users = Depends(get_current_user)
+@router.post("/buy", response_model=schemas.TradeResult)
+def buy_stock(
+    body: schemas.BuyStockCreate,
+    current_user=Depends(oauth2.get_current_user),
+    supabase: Client = Depends(get_supabase),
 ):
-
-    db_stock = db.query(Stocks).filter(
-        Stocks.symbol == stock.stock_symbol
-    ).first()
-
-    if not db_stock:
-        raise HTTPException(status_code=404, detail="Stock not found")
-
-    # Calculate total cost
-    total_cost = db_stock.price * stock.quantity
-
-    # Check wallet balance
-    wallet = db.query(Wallet).filter(
-        Wallet.user_id == current_user.id
-    ).first()
-
-    if not wallet:
-        wallet = Wallet(user_id=current_user.id, balance=10000)
-        db.add(wallet)
-        db.commit()
-        db.refresh(wallet)
-    
-
-    if wallet.balance < total_cost:
-        raise HTTPException(status_code=400, detail="Insufficient balance")
-
+    """
+    Execute a market buy order.
+    Uses the `execute_trade` Postgres function for atomicity.
+    """
     try:
-        # Deduct balance
-        wallet.balance -= total_cost
-
-        # Create Order
-        order = Orders(
-            user_id=current_user.id,
-            stock_id=db_stock.id,
-            quantity=stock.quantity,
-            price=db_stock.price,
-            type="Buy"
+        # Resolve stock
+        stock_resp = (
+            supabase.table("stocks")
+            .select("id, current_price, is_active")
+            .eq("symbol", body.stock_symbol.upper())
+            .execute()
         )
+        if not stock_resp.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Stock not found")
+        stock = stock_resp.data[0]
+        if not stock.get("is_active", True):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Stock is not currently tradeable")
 
-        db.add(order)
+        # Atomic trade via stored function
+        result = supabase.rpc("execute_trade", {
+            "p_user_id":  str(current_user.id),
+            "p_stock_id": str(stock["id"]),
+            "p_type":     "buy",
+            "p_quantity": body.quantity,
+            "p_price":    float(stock["current_price"]),
+        }).execute()
 
-        # Update Portfolio
-        portfolio = db.query(Portfolio).filter(
-            Portfolio.user_id == current_user.id,
-            Portfolio.stock_id == db_stock.id
-        ).first()
+        trade = result.data
+        if isinstance(trade, list):
+            trade = trade[0]
 
-        if portfolio:
-            total_quantity = portfolio.quantity + stock.quantity
-            new_avg_price = (
-                (portfolio.quantity * portfolio.avg_price) +
-                (stock.quantity * db_stock.price)
-            ) / total_quantity
+        if not trade.get("success"):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=trade.get("error", "Trade failed"))
 
-            portfolio.quantity = total_quantity
-            portfolio.avg_price = new_avg_price
-
-        else:
-            portfolio = Portfolio(
-                user_id=current_user.id,
-                stock_id=db_stock.id,
-                quantity=stock.quantity,
-                avg_price=db_stock.price
-            )
-            db.add(portfolio)
-
-        db.commit()
-        db.refresh(order)
-
-        return order
-
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Transaction failed")
+        return schemas.TradeResult(
+            success=True,
+            order_id=trade["order_id"],
+            balance_after=Decimal(str(trade["balance_after"])),
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
 
-@router.post("/sell")
-async def sell_stock(
-    stock: schemas.SellStockCreate,
-    db: Session = Depends(get_db),
-    current_user: models.Users = Depends(get_current_user)
+@router.post("/sell", response_model=schemas.TradeResult)
+def sell_stock(
+    body: schemas.SellStockCreate,
+    current_user=Depends(oauth2.get_current_user),
+    supabase: Client = Depends(get_supabase),
 ):
-
-    # Get stock from DB
-    db_stock = db.query(Stocks).filter(
-        Stocks.symbol == stock.stock_symbol
-    ).first()
-
-    if not db_stock:
-        raise HTTPException(status_code=404, detail="Stock not found")
-
-    # 2️⃣ Get portfolio entry
-    portfolio = db.query(Portfolio).filter(
-        Portfolio.user_id == current_user.id,
-        Portfolio.stock_id == db_stock.id
-    ).first()
-
-    if not portfolio:
-        raise HTTPException(status_code=400, detail="You do not own this stock")
-
-    if stock.quantity > portfolio.quantity:
-        raise HTTPException(status_code=400, detail="Not enough shares to sell")
-
-    # Calculate total sell value
-    total_sell_value = db_stock.price* stock.quantity
-
-    # Calculate realized P&L
-    realized_profit = (db_stock.price - portfolio.avg_price) * stock.quantity
-
-    wallet = db.query(Wallet).filter(
-        Wallet.user_id == current_user.id
-    ).first()
-
-    if not wallet:
-        raise HTTPException(status_code=404, detail="Wallet not found")
-
+    """
+    Execute a market sell order.
+    Uses the `execute_trade` Postgres function for atomicity.
+    Realised P&L is returned in the response.
+    """
     try:
-        # Add money to wallet
-        wallet.balance += total_sell_value
-
-        # Reduce portfolio quantity
-        portfolio.quantity -= stock.quantity
-
-        # Remove stock if quantity becomes zero
-        if portfolio.quantity == 0:
-            db.delete(portfolio)
-
-        # Create Order record
-        order = Orders(
-            user_id=current_user.id,
-            stock_id=db_stock.id,
-            quantity=stock.quantity,
-            price=db_stock.price,
-            type="Sell",
-            # realized_pnl=realized_profit
+        stock_resp = (
+            supabase.table("stocks")
+            .select("id, current_price, is_active")
+            .eq("symbol", body.stock_symbol.upper())
+            .execute()
         )
+        if not stock_resp.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Stock not found")
+        stock = stock_resp.data[0]
 
-        db.add(order)
+        result = supabase.rpc("execute_trade", {
+            "p_user_id":  str(current_user.id),
+            "p_stock_id": str(stock["id"]),
+            "p_type":     "sell",
+            "p_quantity": body.quantity,
+            "p_price":    float(stock["current_price"]),
+        }).execute()
 
-        db.commit()
-        db.refresh(order)
+        trade = result.data
+        if isinstance(trade, list):
+            trade = trade[0]
 
-        return {
-            "message": "Stock sold successfully",
-            "sell_price": db_stock.price
-        }
+        if not trade.get("success"):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=trade.get("error", "Trade failed"))
 
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Transaction failed")
+        return schemas.TradeResult(
+            success=True,
+            order_id=trade["order_id"],
+            balance_after=Decimal(str(trade["balance_after"])),
+            pnl=Decimal(str(trade["pnl"])),
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
-@router.get("/portfolio")
+
+@router.get("/portfolio", response_model=List[schemas.PortfolioItemOut])
 def get_portfolio(
-    db: Session = Depends(get_db),
-    current_user: models.Users = Depends(get_current_user)
+    current_user=Depends(oauth2.get_current_user),
+    supabase: Client = Depends(get_supabase),
 ):
-    portfolio = db.query(Portfolio, Stocks).join(Stocks, Portfolio.stock_id == Stocks.id).filter(
-        Portfolio.user_id == current_user.id
-    ).all()
-    
-    result = []
-    for port, stock in portfolio:
-        result.append({
-            "stock_id": port.stock_id,
-            "symbol": stock.symbol,
-            "name": stock.name,
-            "quantity": port.quantity,
-            "avg_price": port.avg_price,
-            "current_price": stock.price
-        })
-    return result
+    """Return the current user's holdings with live P&L calculations."""
+    try:
+        rows = (
+            supabase.table("portfolio")
+            .select("*, stocks(id, symbol, name, sector, current_price)")
+            .eq("user_id", str(current_user.id))
+            .order("updated_at", desc=True)
+            .execute()
+        )
+        result = []
+        for item in rows.data:
+            stock = item["stocks"]
+            avg   = Decimal(str(item["avg_price"]))
+            cur   = Decimal(str(stock["current_price"]))
+            qty   = item["quantity"]
+            pnl   = (cur - avg) * qty
+            pnl_pct = ((cur - avg) / avg * 100) if avg > 0 else Decimal("0")
+            result.append({
+                "stock_id":      item["stock_id"],
+                "symbol":        stock["symbol"],
+                "name":          stock["name"],
+                "sector":        stock["sector"],
+                "quantity":      qty,
+                "avg_price":     avg,
+                "current_price": cur,
+                "total_value":   cur * qty,
+                "pnl":           pnl,
+                "pnl_pct":       round(pnl_pct, 2),
+                "updated_at":    item["updated_at"],
+            })
+        return result
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
-@router.get("/transactions")
+
+@router.get("/transactions", response_model=List[schemas.TransactionListItem])
 def get_transactions(
-    db: Session = Depends(get_db),
-    current_user: models.Users = Depends(get_current_user)
+    current_user=Depends(oauth2.get_current_user),
+    supabase: Client = Depends(get_supabase),
 ):
-    orders = db.query(Orders, Stocks).join(Stocks, Orders.stock_id == Stocks.id).filter(
-        Orders.user_id == current_user.id
-    ).order_by(Orders.executed_at.desc()).all()
-    
-    result = []
-    for order, stock in orders:
-        result.append({
-            "id": order.id,
-            "symbol": stock.symbol,
-            "type": order.type.lower(),
-            "quantity": order.quantity,
-            "price": order.price,
-            "date": order.executed_at.isoformat() if order.executed_at else None,
-            "amount": order.quantity * order.price,
-            "status": "completed"
-        })
-    return result
+    """Return the user's complete order history, newest first."""
+    try:
+        rows = (
+            supabase.table("orders")
+            .select("*, stocks(symbol), transactions(pnl)")
+            .eq("user_id", str(current_user.id))
+            .order("executed_at", desc=True)
+            .execute()
+        )
+        result = []
+        for order in rows.data:
+            # transactions is a list (1-to-1 but returned as array by Supabase)
+            txn_list = order.get("transactions") or []
+            pnl = Decimal(str(txn_list[0]["pnl"])) if txn_list else Decimal("0")
+            result.append({
+                "id":          order["id"],
+                "symbol":      order["stocks"]["symbol"],
+                "order_type":  order["order_type"],
+                "quantity":    order["quantity"],
+                "price":       Decimal(str(order["price"])),
+                "total_value": Decimal(str(order["total_value"])),
+                "pnl":         pnl,
+                "date":        order["executed_at"],
+                "status":      order.get("status", "completed"),
+            })
+        return result
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))

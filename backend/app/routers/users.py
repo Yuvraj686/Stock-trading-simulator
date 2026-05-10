@@ -1,43 +1,83 @@
-from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
-from .. import models, schemas, utils
-from sqlalchemy.orm import Session
-from ..database import get_db
+"""users.py — Current user profile and balance endpoints."""
 
-router = APIRouter(
-    # prefix="/users",
-    tags=['Users']
-)
+from fastapi import APIRouter, Depends, HTTPException, status
+from supabase import Client
 
-@router.post("/user", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+from ..database import get_supabase
+from .. import schemas, oauth2
 
-    existing_user = db.query(models.Users).filter(
-        models.Users.email == user.email
-    ).first()
+router = APIRouter(tags=["Users"])
 
-    if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
+
+@router.get("/user", response_model=schemas.UserOut)
+def get_current_user_profile(
+    current_user=Depends(oauth2.get_current_user),
+    supabase: Client = Depends(get_supabase),
+):
+    """Return the authenticated user's profile including current balance."""
+    try:
+        response = (
+            supabase.table("users")
+            .select("*")
+            .eq("id", str(current_user.id))
+            .execute()
         )
-
-    user_data = user.dict()
-    user_data["password"] = utils.hash(user.password)
-    
-    # The database model does not have a username column at the moment
-    if "username" in user_data:
-        del user_data["username"]
-
-    new_user = models.Users(**user_data)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    # Initialize wallet with $10,000
-    new_wallet = models.Wallet(user_id=new_user.id, balance=10000)
-    db.add(new_wallet)
-    db.commit()
-
-    return new_user
+        if not response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User profile not found")
+        return response.data[0]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
 
+@router.get("/wallet")
+def get_wallet(
+    current_user=Depends(oauth2.get_current_user),
+    supabase: Client = Depends(get_supabase),
+):
+    """Return the user's current cash balance (from users.balance)."""
+    try:
+        response = (
+            supabase.table("users")
+            .select("id, balance, updated_at")
+            .eq("id", str(current_user.id))
+            .execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        row = response.data[0]
+        return {
+            "user_id": row["id"],
+            "balance": row["balance"],
+            "updated_at": row["updated_at"],
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+
+@router.patch("/user/display-name", response_model=schemas.UserOut)
+def update_display_name(
+    display_name: str,
+    current_user=Depends(oauth2.get_current_user),
+    supabase: Client = Depends(get_supabase),
+):
+    """Update the user's display name."""
+    if not display_name.strip():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Display name cannot be empty")
+    try:
+        response = (
+            supabase.table("users")
+            .update({"display_name": display_name.strip()})
+            .eq("id", str(current_user.id))
+            .execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return response.data[0]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))

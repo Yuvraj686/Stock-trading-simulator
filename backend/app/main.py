@@ -1,37 +1,53 @@
-from fastapi import FastAPI, Depends
+"""
+main.py — FastAPI application entry point for the Stock Trading Simulator.
+"""
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
-# from backend.app.routers import wallet
-from .database import engine , get_db
-from . import models , schemas
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from typing import List
-from .routers import orders, stocks, users, auth, wallet
+from .routers import auth, stocks, users, orders, messages, watchlist
 
-app = FastAPI(title="Stock Trading Simulator")
-from sqlalchemy import inspect
+# ── Rate limiter ──────────────────────────────────────────────────────────────
+limiter = Limiter(key_func=get_remote_address)
 
-inspector = inspect(engine)
-print(inspector.get_table_names())
+# ── Application ───────────────────────────────────────────────────────────────
+app = FastAPI(
+    title="Stock Trading Simulator API",
+    description="Paper-trading platform backed by Supabase. Buy, sell, track portfolio & chat.",
+    version="2.0.0",
+)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],   # Tighten to your frontend origin in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-models.Base.metadata.create_all(bind=engine)
-print(models.Base.metadata.tables.keys())
+# ── Routers ───────────────────────────────────────────────────────────────────
+app.include_router(auth.router,      prefix="/api")
+app.include_router(stocks.router,    prefix="/api")
+app.include_router(users.router,     prefix="/api")
+app.include_router(orders.router,    prefix="/api")
+app.include_router(messages.router,  prefix="/api")
+app.include_router(watchlist.router, prefix="/api")
 
-app.include_router(stocks.router)
-app.include_router(users.router)
-app.include_router(auth.router)
-app.include_router(orders.router)
-app.include_router(wallet.router)
+
+# ── Health check ──────────────────────────────────────────────────────────────
+@app.get("/", tags=["Health"])
+def health_check():
+    return {"status": "ok", "message": "Stock Trading Simulator API v2.0"}
 
 
-@app.get("/")
-def get_root():
-    return {"message":"Welcome to my stock simulator"}
+@app.get("/health", tags=["Health"])
+def liveness():
+    return {"status": "healthy"}
