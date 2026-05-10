@@ -10,6 +10,7 @@ import Portfolio from "./pages/Portfolio.tsx";
 import Holdings from "./pages/Holdings.tsx";
 import Transactions from "./pages/Transactions.tsx";
 import WatchlistPage from "./pages/Watchlist.tsx";
+import Community from "./pages/Community.tsx";
 import { Login } from "./pages/Login.tsx";
 import { Signup } from "./pages/Signup.tsx";
 import { PortfolioProvider } from "./context/PortfolioContext.tsx";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/holdings"    element={<PrivateRoute><Holdings /></PrivateRoute>} />
               <Route path="/transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />
               <Route path="/watchlist"   element={<PrivateRoute><WatchlistPage /></PrivateRoute>} />
+              <Route path="/community"  element={<PrivateRoute><Community /></PrivateRoute>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

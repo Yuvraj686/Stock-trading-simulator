@@ -18,6 +18,7 @@ const titles: Record<string, { title: string; sub: string }> = {
   "/holdings":     { title: "Holdings",     sub: "All open positions with live P&L" },
   "/transactions": { title: "Transactions", sub: "Complete order history" },
   "/watchlist":    { title: "Watchlist",    sub: "Tickers you're tracking" },
+  "/community":    { title: "Community",    sub: "Group chat for all traders" },
 };
 
 export function TopBar() {

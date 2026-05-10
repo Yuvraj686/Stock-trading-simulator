@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Activity,
   Briefcase,
+  MessageSquare,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ const nav = [
   { label: "Holdings",     icon: Briefcase,       to: "/holdings" },
   { label: "Transactions", icon: History,         to: "/transactions" },
   { label: "Watchlist",    icon: Star,            to: "/watchlist" },
+  { label: "Community",    icon: MessageSquare,    to: "/community" },
 ];
 
 const bottom = [
